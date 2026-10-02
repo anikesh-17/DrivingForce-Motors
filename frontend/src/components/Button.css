@@ -1,0 +1,102 @@
+.dfm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-normal);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  user-select: none;
+  border: 1px solid transparent;
+  gap: 0.5rem;
+}
+
+/* Sizes */
+.dfm-btn-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+}
+
+.dfm-btn-md {
+  padding: 0.7rem 1.4rem;
+  font-size: 0.95rem;
+}
+
+.dfm-btn-lg {
+  padding: 0.9rem 2rem;
+  font-size: 1.05rem;
+  border-radius: var(--radius-lg);
+}
+
+/* Primary (Automotive Crimson) */
+.dfm-btn-primary {
+  background: linear-gradient(135deg, var(--accent-red) 0%, #c1121f 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(229, 56, 59, 0.35);
+}
+
+.dfm-btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent-red-hover) 0%, var(--accent-red) 100%);
+  box-shadow: 0 6px 20px rgba(229, 56, 59, 0.55);
+  transform: translateY(-2px);
+}
+
+.dfm-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary (Glass Charcoal) */
+.dfm-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.dfm-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Outline */
+.dfm-btn-outline {
+  background: transparent;
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.dfm-btn-outline:hover {
+  border-color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Ghost */
+.dfm-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.dfm-btn-ghost:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dfm-btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.dfm-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
