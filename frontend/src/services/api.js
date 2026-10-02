@@ -1,64 +1,72 @@
-import { mockVehicles } from "../data/mockVehicles";
-
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+
+function toUiVehicle(vehicle) {
+  return {
+    ...vehicle,
+    year: vehicle.modelYear,
+    category: vehicle.vehicleType,
+    availability: vehicle.availabilityStatus,
+    seating: vehicle.seatingCapacity == null ? "—" : `${vehicle.seatingCapacity} Seats`,
+    images: vehicle.imageUrl
+      ? [vehicle.imageUrl]
+      : ["https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80"],
+    horsepower: vehicle.horsepower || "Not specified",
+    acceleration: vehicle.acceleration || "Not specified",
+    topSpeed: vehicle.topSpeed || "Not specified",
+    drivetrain: vehicle.drivetrain || "Not specified",
+    vin: vehicle.vin || "Not specified",
+    features: vehicle.features || [],
+  };
+}
+
+async function getResponseData(url) {
+  const response = await fetch(url);
+  let body;
+  try {
+    body = await response.json();
+  } catch {
+    throw new Error(`Vehicle API returned an invalid response (HTTP ${response.status}).`);
+  }
+
+  if (!response.ok) {
+    const error = new Error(body.message || `Vehicle API request failed (HTTP ${response.status}).`);
+    error.status = response.status;
+    throw error;
+  }
+  if (body.success !== true) {
+    throw new Error(body.message || "Vehicle API request was unsuccessful.");
+  }
+  return body.data;
+}
 
 /**
  * DrivingForce Motors API Service
- * Configured with future backend endpoint (http://localhost:5000/api).
- * Returns robust mock data for the UI phase while maintaining standard API signatures.
+   * Vehicle reads use the Express API. Other UI-phase actions remain placeholders.
  */
 
 export const api = {
   baseUrl: BASE_URL,
 
   /**
-   * Fetch all vehicles with optional query filters
+   * Fetch all vehicles. Existing filters are applied by the pages after retrieval.
    */
-  async getVehicles(filters = {}) {
-    try {
-      // In production/future:
-      // const res = await fetch(`${BASE_URL}/vehicles?${new URLSearchParams(filters)}`);
-      // if (res.ok) return await res.json();
-    } catch (e) {
-      console.warn("Backend not reached, using local mock vehicles:", e.message);
+  async getVehicles() {
+    const data = await getResponseData(`${BASE_URL}/vehicles`);
+    if (!Array.isArray(data)) {
+      throw new Error("Vehicle API returned an invalid vehicle list.");
     }
-
-    // Filter mock data locally
-    let list = [...mockVehicles];
-    if (filters.category && filters.category !== "All") {
-      list = list.filter((v) => v.category.toLowerCase() === filters.category.toLowerCase());
-    }
-    if (filters.fuelType && filters.fuelType !== "All") {
-      list = list.filter((v) => v.fuelType.toLowerCase() === filters.fuelType.toLowerCase());
-    }
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      list = list.filter(
-        (v) =>
-          v.brand.toLowerCase().includes(q) ||
-          v.model.toLowerCase().includes(q) ||
-          v.variant.toLowerCase().includes(q)
-      );
-    }
-    return { success: true, data: list, total: list.length };
+    return { success: true, data: data.map(toUiVehicle), total: data.length };
   },
 
   /**
    * Fetch a single vehicle by ID
    */
   async getVehicleById(id) {
-    try {
-      // const res = await fetch(`${BASE_URL}/vehicles/${id}`);
-      // if (res.ok) return await res.json();
-    } catch (e) {
-      console.warn("Backend not reached, resolving from local mock:", e.message);
+    const data = await getResponseData(`${BASE_URL}/vehicles/${encodeURIComponent(id)}`);
+    if (!data || typeof data !== "object") {
+      throw new Error("Vehicle API returned an invalid vehicle record.");
     }
-
-    const vehicle = mockVehicles.find((v) => v.id === id);
-    if (!vehicle) {
-      return { success: false, error: "Vehicle not found" };
-    }
-    return { success: true, data: vehicle };
+    return { success: true, data: toUiVehicle(data) };
   },
 
   /**

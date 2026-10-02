@@ -12,6 +12,7 @@ export default function TestDrive() {
 
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [vehicleLoadError, setVehicleLoadError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
 
@@ -33,8 +34,8 @@ export default function TestDrive() {
   useEffect(() => {
     async function loadVehicles() {
       setLoading(true);
-      const res = await api.getVehicles();
-      if (res.success) {
+      try {
+        const res = await api.getVehicles();
         setVehicles(res.data);
         if (!formData.vehicleId && res.data.length > 0) {
           setFormData((prev) => ({
@@ -42,8 +43,11 @@ export default function TestDrive() {
             vehicleId: preselectedVehicleId || res.data[0].id
           }));
         }
+      } catch (error) {
+        setVehicleLoadError(error.message || "Unable to load available vehicles.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadVehicles();
   }, [preselectedVehicleId]);
@@ -243,7 +247,8 @@ export default function TestDrive() {
                 {/* Vehicle Selection */}
                 <div className="form-row">
                   <div className="form-group flex-1">
-                    <label htmlFor="td-vehicle">Select Vehicle of Interest *</label>
+                <label htmlFor="td-vehicle">Select Vehicle of Interest *</label>
+                {vehicleLoadError && <p className="field-error" role="alert">{vehicleLoadError}</p>}
                     <select
                       id="td-vehicle"
                       value={formData.vehicleId}
@@ -255,7 +260,7 @@ export default function TestDrive() {
                       ) : (
                         vehicles.map((v) => (
                           <option key={v.id} value={v.id}>
-                            {v.year} {v.brand} {v.model} ({v.variant}) — ${v.price.toLocaleString()}
+                            {v.year} {v.brand} {v.model} ({v.variant}) — ₹{v.price.toLocaleString("en-IN")}
                           </option>
                         ))
                       )}

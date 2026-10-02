@@ -11,6 +11,7 @@ export default function VehicleDetails() {
   const [allVehicles, setAllVehicles] = useState([]);
   const [selectedImage, setSelectedImage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
   const [enquireModalOpen, setEnquireModalOpen] = useState(false);
   const [enquireSubmitted, setEnquireSubmitted] = useState(false);
   const [enquiryForm, setEnquiryForm] = useState({ name: "", email: "", phone: "", message: "" });
@@ -19,19 +20,23 @@ export default function VehicleDetails() {
   useEffect(() => {
     async function fetchDetails() {
       setLoading(true);
-      const [vehicleRes, allRes] = await Promise.all([
-        api.getVehicleById(id),
-        api.getVehicles()
-      ]);
-
-      if (vehicleRes.success) {
+      try {
+        const [vehicleRes, allRes] = await Promise.all([
+          api.getVehicleById(id),
+          api.getVehicles()
+        ]);
         setVehicle(vehicleRes.data);
         setSelectedImage(vehicleRes.data.images?.[0] || "");
-      }
-      if (allRes.success) {
         setAllVehicles(allRes.data);
+      } catch (error) {
+        if (error.status === 404) {
+          setVehicle(null);
+        } else {
+          setApiError(error.message || "Unable to load vehicle details.");
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchDetails();
   }, [id]);
@@ -60,8 +65,8 @@ export default function VehicleDetails() {
   if (!vehicle) {
     return (
       <div className="container not-found-view">
-        <h2>Vehicle Not Found</h2>
-        <p>The vehicle you are seeking is either no longer available or the identifier is invalid.</p>
+        <h2>{apiError ? "Vehicle Details Unavailable" : "Vehicle Not Found"}</h2>
+        <p>{apiError || "The vehicle you are seeking is either no longer available or the identifier is invalid."}</p>
         <Button to="/vehicles" variant="primary">
           Back to Inventory
         </Button>
@@ -71,7 +76,7 @@ export default function VehicleDetails() {
 
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
     maximumFractionDigits: 0
   }).format(vehicle.price);
 

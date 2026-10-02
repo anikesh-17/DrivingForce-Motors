@@ -11,15 +11,19 @@ export default function Home() {
   const [vehicles, setVehicles] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const res = await api.getVehicles();
-      if (res.success) {
+      try {
+        const res = await api.getVehicles();
         setVehicles(res.data);
+      } catch (error) {
+        setApiError(error.message || "Unable to load vehicle inventory.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadData();
   }, []);
@@ -102,6 +106,11 @@ export default function Home() {
             <div className="loading-state">
               <div className="spinner"></div>
               <p>Loading curated inventory...</p>
+            </div>
+          ) : apiError ? (
+            <div className="empty-results-card glass-panel" role="alert">
+              <h3>Vehicle Inventory Unavailable</h3>
+              <p>{apiError}</p>
             </div>
           ) : (
             <div className="vehicles-grid">

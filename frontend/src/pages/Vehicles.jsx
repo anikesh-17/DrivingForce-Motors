@@ -10,6 +10,7 @@ export default function Vehicles() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
 
   // Filter States initialized from URL params if present
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
@@ -22,11 +23,15 @@ export default function Vehicles() {
   useEffect(() => {
     async function loadInventory() {
       setLoading(true);
-      const res = await api.getVehicles();
-      if (res.success) {
+      try {
+        const res = await api.getVehicles();
         setVehicles(res.data);
+        setMaxPrice(Math.max(250000, ...res.data.map((vehicle) => vehicle.price)));
+      } catch (error) {
+        setApiError(error.message || "Unable to load vehicle inventory.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadInventory();
   }, []);
@@ -47,7 +52,7 @@ export default function Vehicles() {
     setSelectedCategory("All");
     setSelectedFuel("All");
     setSelectedTransmission("All");
-    setMaxPrice(250000);
+    setMaxPrice(priceCeiling);
     setSortBy("featured");
     setSearchParams({});
   };
@@ -101,8 +106,9 @@ export default function Vehicles() {
   }, [vehicles, searchQuery, selectedCategory, selectedFuel, selectedTransmission, maxPrice, sortBy]);
 
   const categories = ["All", "Electric", "Coupe", "SUV", "Sedan"];
-  const fuelTypes = ["All", "Electric", "Petrol", "Hybrid"];
+  const fuelTypes = ["All", "Electric", "Petrol", "Diesel", "Hybrid"];
   const transmissions = ["All", "Automatic", "Dual-Clutch"];
+  const priceCeiling = Math.max(250000, ...vehicles.map((vehicle) => vehicle.price));
 
   return (
     <div className="vehicles-page" id="vehicles-view">
@@ -211,22 +217,22 @@ export default function Vehicles() {
             <div className="filter-price-header">
               <label htmlFor="price-range" className="filter-label">Max Price</label>
               <span className="price-display">
-                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(maxPrice)}
+                {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(maxPrice)}
               </span>
             </div>
             <input
               id="price-range"
               type="range"
-              min={80000}
-              max={250000}
-              step={5000}
+              min={0}
+              max={priceCeiling}
+              step={Math.max(1, Math.round(priceCeiling / 50))}
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               className="price-slider"
             />
             <div className="slider-bounds">
-              <span>$80K</span>
-              <span>$250K+</span>
+              <span>₹0</span>
+              <span>{new Intl.NumberFormat("en-IN", { notation: "compact", maximumFractionDigits: 0 }).format(priceCeiling)}</span>
             </div>
           </div>
         </aside>
@@ -261,6 +267,11 @@ export default function Vehicles() {
             <div className="loading-state">
               <div className="spinner"></div>
               <p>Loading vehicle inventory...</p>
+            </div>
+          ) : apiError ? (
+            <div className="empty-results-card glass-panel" role="alert">
+              <h3>Vehicle Inventory Unavailable</h3>
+              <p>{apiError}</p>
             </div>
           ) : filteredVehicles.length > 0 ? (
             <div className="vehicles-catalog-grid">
