@@ -97,18 +97,31 @@ export const api = {
    * Submit test drive booking
    */
   async bookTestDrive(bookingData) {
-    console.log("[API] Booking test drive:", bookingData);
-    // Simulating API response
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          success: true,
-          bookingReference: `DFM-TD-${Math.floor(100000 + Math.random() * 900000)}`,
-          data: bookingData,
-          message: "Test drive booking confirmed successfully."
-        });
-      }, 400);
+    const response = await fetch(`${BASE_URL}/test-drives`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bookingData),
     });
+
+    let body;
+    try {
+      body = await response.json();
+    } catch {
+      throw new Error(`Test drive API returned an invalid response (HTTP ${response.status}).`);
+    }
+
+    if (!response.ok) {
+      const error = new Error(body.message || `Test drive API request failed (HTTP ${response.status}).`);
+      error.status = response.status;
+      throw error;
+    }
+    if (body.success !== true) {
+      throw new Error(body.message || "Test drive booking was unsuccessful.");
+    }
+
+    return body;
   },
 
   /**

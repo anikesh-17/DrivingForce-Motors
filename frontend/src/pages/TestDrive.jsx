@@ -1,10 +1,32 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
 import SectionTitle from "../components/SectionTitle";
 import api from "../services/api";
 import { dealershipInfo } from "../data/mockVehicles";
 import "./TestDrive.css";
+
+function toSalesforceTime(value) {
+  const match = value.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) {
+    throw new Error("Please select a valid preferred time.");
+  }
+
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const meridiem = match[3].toUpperCase();
+  if (hours < 1 || hours > 12 || minutes > 59) {
+    throw new Error("Please select a valid preferred time.");
+  }
+
+  if (meridiem === "AM") {
+    hours = hours === 12 ? 0 : hours;
+  } else {
+    hours = hours === 12 ? 12 : hours + 12;
+  }
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00.000Z`;
+}
 
 export default function TestDrive() {
   const [searchParams] = useSearchParams();
@@ -14,6 +36,7 @@ export default function TestDrive() {
   const [loading, setLoading] = useState(true);
   const [vehicleLoadError, setVehicleLoadError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [confirmation, setConfirmation] = useState(null);
 
   // Form Fields
@@ -80,25 +103,33 @@ export default function TestDrive() {
     if (!validate()) return;
 
     setSubmitting(true);
+    setSubmitError("");
     const selectedVehicle = vehicles.find((v) => v.id === formData.vehicleId);
-
-    const payload = {
-      ...formData,
-      vehicleDetails: selectedVehicle
-        ? `${selectedVehicle.brand} ${selectedVehicle.model} (${selectedVehicle.variant})`
-        : "Custom Fleet Selection"
+    const bookingData = {
+      vehicleId: formData.vehicleId,
+      customerName: formData.fullName,
+      phone: formData.phone,
+      email: formData.email,
+      testDriveDate: formData.date,
+      preferredTime: toSalesforceTime(formData.timeSlot),
+      notes: formData.notes,
     };
 
-    const res = await api.bookTestDrive(payload);
-    setSubmitting(false);
+    try {
+      const res = await api.bookTestDrive(bookingData);
 
-    if (res.success) {
-      setConfirmation({
-        reference: res.bookingReference,
-        data: payload,
-        vehicle: selectedVehicle
-      });
-      window.scrollTo({ top: 120, behavior: "smooth" });
+      if (res.success) {
+        setConfirmation({
+          reference: res.data?.id,
+          data: formData,
+          vehicle: selectedVehicle
+        });
+        window.scrollTo({ top: 120, behavior: "smooth" });
+      }
+    } catch (error) {
+      setSubmitError(error.message || "Unable to submit your test drive request. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -197,6 +228,7 @@ export default function TestDrive() {
               <p className="td-form-desc">
                 Fill in the details below to reserve your private drive experience.
               </p>
+              {submitError && <p className="field-error" role="alert">{submitError}</p>}
 
               <form onSubmit={handleSubmit} noValidate className="test-drive-form">
                 {/* Full Name */}
