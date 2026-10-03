@@ -2,19 +2,43 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api
 
 function toUiVehicle(vehicle) {
   return {
-    ...vehicle,
-    year: vehicle.modelYear,
-    category: vehicle.vehicleType,
-    availability: vehicle.availabilityStatus,
-    seating: vehicle.seatingCapacity == null ? "—" : `${vehicle.seatingCapacity} Seats`,
-    images: vehicle.imageUrl
-      ? [vehicle.imageUrl]
-      : ["https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80"],
+    id: vehicle.Id,
+    name: vehicle.Name,
+
+    brand: vehicle.Brand__c,
+    model: vehicle.Model__c,
+    variant: vehicle.Variant__c,
+
+    year: vehicle.Model_Year__c,
+    category: vehicle.Vehicle_Type__c,
+    fuelType: vehicle.Fuel_Type__c,
+    transmission: vehicle.Transmission__c,
+
+    price: vehicle.Price__c,
+    mileage: vehicle.Mileage__c,
+
+    seatingCapacity: vehicle.Seating_Capacity__c,
+    seating:
+      vehicle.Seating_Capacity__c == null
+        ? "—"
+        : `${vehicle.Seating_Capacity__c} Seats`,
+
+    color: vehicle.Color__c,
+    availability: vehicle.Availability_Status__c,
+    description: vehicle.Description__c || "No description available.",
+
+    images: vehicle.Primary_Image_URL__c
+      ? [vehicle.Primary_Image_URL__c]
+      : [
+          "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80",
+        ],
+
     horsepower: vehicle.horsepower || "Not specified",
     acceleration: vehicle.acceleration || "Not specified",
     topSpeed: vehicle.topSpeed || "Not specified",
     drivetrain: vehicle.drivetrain || "Not specified",
     vin: vehicle.vin || "Not specified",
+
     features: vehicle.features || [],
   };
 }
