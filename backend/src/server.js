@@ -5,6 +5,7 @@ require("dotenv").config();
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const salesforceAuthRoutes = require("./routes/salesforceAuthRoutes");
 const testDriveRoutes = require("./routes/testDriveRoutes");
+const leadRoutes = require("./routes/leadRoutes");
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/test-drives", testDriveRoutes);
+app.use("/api/leads", leadRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/auth", salesforceAuthRoutes);
 

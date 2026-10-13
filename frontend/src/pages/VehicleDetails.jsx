@@ -16,6 +16,7 @@ export default function VehicleDetails() {
   const [enquireSubmitted, setEnquireSubmitted] = useState(false);
   const [enquiryForm, setEnquiryForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
+  const [enquiryError, setEnquiryError] = useState("");
 
   useEffect(() => {
     async function fetchDetails() {
@@ -44,13 +45,24 @@ export default function VehicleDetails() {
   const handleEnquirySubmit = async (e) => {
     e.preventDefault();
     setSubmittingEnquiry(true);
-    await api.submitContact({
-      ...enquiryForm,
-      vehicle: `${vehicle.brand} ${vehicle.model} (${vehicle.variant})`,
-      type: "Vehicle Acquisition Enquiry"
-    });
-    setSubmittingEnquiry(false);
-    setEnquireSubmitted(true);
+    setEnquiryError("");
+    try {
+      await api.submitLead({
+        customerName: enquiryForm.name,
+        email: enquiryForm.email,
+        phone: enquiryForm.phone,
+        vehicleId: vehicle.id,
+        enquiryType: "Vehicle Enquiry",
+        leadSource: "Website",
+        status: "New",
+        notes: enquiryForm.message,
+      });
+      setEnquireSubmitted(true);
+    } catch (error) {
+      setEnquiryError(error.message || "Unable to submit your enquiry. Please try again.");
+    } finally {
+      setSubmittingEnquiry(false);
+    }
   };
 
   if (loading) {
@@ -327,6 +339,8 @@ export default function VehicleDetails() {
                       onChange={(e) => setEnquiryForm({ ...enquiryForm, message: e.target.value })}
                     ></textarea>
                   </div>
+
+                  {enquiryError && <p role="alert">{enquiryError}</p>}
 
                   <Button type="submit" variant="primary" size="lg" disabled={submittingEnquiry} className="w-full">
                     {submittingEnquiry ? "Transmitting..." : "Send Acquisition Request"}

@@ -125,6 +125,37 @@ export const api = {
   },
 
   /**
+   * Submit a vehicle enquiry lead
+   */
+  async submitLead(leadData) {
+    const response = await fetch(`${BASE_URL}/leads`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(leadData),
+    });
+
+    let body;
+    try {
+      body = await response.json();
+    } catch {
+      throw new Error(`Lead API returned an invalid response (HTTP ${response.status}).`);
+    }
+
+    if (!response.ok) {
+      const error = new Error(body.message || `Lead API request failed (HTTP ${response.status}).`);
+      error.status = response.status;
+      throw error;
+    }
+    if (body.success !== true) {
+      throw new Error(body.message || "Lead submission was unsuccessful.");
+    }
+
+    return body;
+  },
+
+  /**
    * Submit contact form message
    */
   async submitContact(contactData) {
