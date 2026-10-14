@@ -75,7 +75,52 @@ async function createSalesforceRecord(objectName, recordData) {
     return data;
 }
 
+async function updateSalesforceRecord(objectName, recordId, recordData) {
+    const tokenData = getSalesforceToken();
+
+    if (!tokenData) {
+        throw new Error(
+            "Salesforce is not authenticated. Visit /api/auth/salesforce first."
+        );
+    }
+
+    const url = new URL(
+        `/services/data/v67.0/sobjects/${objectName}/${encodeURIComponent(recordId)}`,
+        tokenData.instance_url
+    );
+    const response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+            Authorization: `${tokenData.token_type} ${tokenData.access_token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+        body: JSON.stringify(recordData),
+    });
+
+    const responseText = await response.text();
+    let data = null;
+    if (responseText) {
+        try {
+            data = JSON.parse(responseText);
+        } catch {
+            data = { message: responseText };
+        }
+    }
+
+    if (!response.ok) {
+        const error = new Error(
+            data?.[0]?.message || data?.message || "Salesforce record update failed"
+        );
+        error.status = response.status;
+        throw error;
+    }
+
+    return data;
+}
+
 module.exports = {
     querySalesforce,
     createSalesforceRecord,
+    updateSalesforceRecord,
 };
