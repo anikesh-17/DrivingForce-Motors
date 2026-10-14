@@ -6,16 +6,25 @@
   align-items: center;
   justify-content: center;
   padding-block: 6rem 5rem;
-  background: 
-    linear-gradient(180deg, rgba(9, 12, 19, 0.4) 0%, rgba(9, 12, 19, 0.95) 100%),
-    url("https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=2000&q=85") center center / cover no-repeat;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(9, 12, 19, 0.4) 0%,
+      rgba(9, 12, 19, 0.95) 100%
+    ),
+    url("https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=2000&q=85")
+      center center / cover no-repeat;
   overflow: hidden;
 }
 
 .hero-backdrop-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 30%, rgba(229, 56, 59, 0.12) 0%, transparent 70%);
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(229, 56, 59, 0.12) 0%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
@@ -77,9 +86,18 @@
 }
 
 @keyframes pulseAnimation {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(229, 56, 59, 0.7); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(229, 56, 59, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(229, 56, 59, 0); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(229, 56, 59, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 8px rgba(229, 56, 59, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(229, 56, 59, 0);
+  }
 }
 
 .hero-headline {
@@ -245,9 +263,14 @@
   position: relative;
   border-radius: var(--radius-xl);
   padding: 4rem 3.5rem;
-  background: 
-    linear-gradient(125deg, rgba(20, 26, 40, 0.95) 0%, rgba(12, 16, 26, 0.9) 100%),
-    url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80") center center / cover no-repeat;
+  background:
+    linear-gradient(
+      125deg,
+      rgba(20, 26, 40, 0.95) 0%,
+      rgba(12, 16, 26, 0.9) 100%
+    ),
+    url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80")
+      center center / cover no-repeat;
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
   display: flex;
@@ -265,7 +288,11 @@
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(229, 56, 59, 0.25) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(229, 56, 59, 0.25) 0%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
@@ -359,7 +386,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive Media Queries */

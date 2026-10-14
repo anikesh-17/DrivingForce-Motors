@@ -8,6 +8,7 @@ import Contact from "./pages/Contact";
 import TestDrive from "./pages/TestDrive";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import LeadsDashboard from "./pages/LeadsDashboard";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="test-drive" element={<TestDrive />} />
           <Route path="login" element={<Login />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="admin/leads" element={<LeadsDashboard />} />
         </Route>
       </Routes>
     </BrowserRouter>

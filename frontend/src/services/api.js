@@ -124,6 +124,98 @@ export const api = {
     return body;
   },
 
+
+  /**
+   * Fetch leads from Salesforce through the backend
+   */
+  async getLeads() {
+    const response = await fetch(`${BASE_URL}/leads`);
+
+    let body;
+    try {
+      body = await response.json();
+    } catch {
+      throw new Error(
+        `Lead API returned an invalid response (HTTP ${response.status}).`
+      );
+    }
+
+    if (!response.ok) {
+      const error = new Error(
+        body.message || `Lead API request failed (HTTP ${response.status}).`
+      );
+      error.status = response.status;
+      throw error;
+    }
+
+    if (body.success !== true || !Array.isArray(body.data)) {
+      throw new Error(body.message || "Lead API returned an invalid lead list.");
+    }
+
+    return {
+      success: true,
+      data: body.data,
+      total: body.total ?? body.data.length,
+    };
+  },
+
+  /** Fetch follow-up records for a Salesforce lead */
+  async getLeadFollowUps(leadId) {
+    const response = await fetch(`${BASE_URL}/leads/${encodeURIComponent(leadId)}/follow-ups`);
+    let body;
+    try {
+      body = await response.json();
+    } catch {
+      throw new Error(`Follow-up API returned an invalid response (HTTP ${response.status}).`);
+    }
+
+    if (!response.ok) {
+      const error = new Error(body.message || `Follow-up API request failed (HTTP ${response.status}).`);
+      error.status = response.status;
+      throw error;
+    }
+    if (body.success !== true || !Array.isArray(body.data)) {
+      throw new Error(body.message || "Follow-up API returned an invalid follow-up list.");
+    }
+
+    return { success: true, data: body.data, total: body.total ?? body.data.length };
+  },
+
+  /** Update the status field on a Salesforce lead */
+  async updateLeadStatus(leadId, status) {
+    const response = await fetch(`${BASE_URL}/leads/${encodeURIComponent(leadId)}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+
+    const responseText = await response.text();
+    let body = null;
+    if (responseText) {
+      try {
+        body = JSON.parse(responseText);
+      } catch {
+        if (response.ok) {
+          throw new Error("Lead status API returned an invalid response.");
+        }
+      }
+    }
+
+    if (!response.ok) {
+      const error = new Error(
+        body?.message || `Lead status update failed (HTTP ${response.status}).`,
+      );
+      error.status = response.status;
+      throw error;
+    }
+    if (body?.success !== true) {
+      throw new Error(body?.message || "Lead status update was unsuccessful.");
+    }
+
+    return body;
+  },
+
+
   /**
    * Submit a vehicle enquiry lead
    */
